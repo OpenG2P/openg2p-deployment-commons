@@ -9,9 +9,17 @@ global:
   sysAdminEmail: admin@openg2p.sandbox.org
   redisInstallationName: '{{ .Release.Name }}-redis'
   redisAuthInstallationName: '{{ .Release.Name }}-redis-auth'
+  database:
+    type: external   # internal | external
+
+    external:
+      host: "172.29.2.220"
+      port: 5432
+      existingSecret: "commons-postgresql-external"
+      existingSecretPasswordKey: postgres-password
 
 postgresql:
-  enabled: true
+  enabled: false
   auth:
     postgresPassword: ""
   additionalDbs:
@@ -54,11 +62,10 @@ postgresql:
 postgres-init:
   enabled: true
   postgresql:
-    host: '{{ tpl .Values.global.postgresqlHost $ }}'
+    host: '{{ if eq .Values.global.database.type "external" }}{{ .Values.global.database.external.host }}{{ else }}{{ .Release.Name }}-postgresql{{ end }}'
     port: 5432
-    # Hard coding.
-    existingSecret: commons-postgresql
-    existingSecretPostgresPasswordKey: postgres-password
+    existingSecret: '{{ if eq .Values.global.database.type "external" }}{{ .Values.global.database.external.existingSecret }}{{ else }}{{ .Release.Name }}-postgresql{{ end }}'
+    existingSecretPostgresPasswordKey: '{{ if eq .Values.global.database.type "external" }}{{ .Values.global.database.external.existingSecretPasswordKey }}{{ else }}postgres-password{{ end }}'
   databases:
     # We are creating the following databases as the respective charts don't create on their own.
     # Note that Keymanager creates DB on its own.
@@ -92,6 +99,7 @@ masterData:
   global:
     masterDataHostname: master-data.qa.openg2p.org
   postgres-init:
+    enabled: false
     job:
       annotations:
         "helm.sh/hook": post-install,post-upgrade
@@ -104,7 +112,7 @@ odk-central:
   enabled: true
   hostname: odk.qa.openg2p.org
 
-  postgresqlInstallationName: '{{ tpl .Values.global.postgresqlHost $ }}'
+  postgresqlInstallationName: '{{ if eq .Values.global.database.type "external" }}{{ .Values.global.database.external.host }}{{ else }}{{ .Release.Name }}-postgresql{{ end }}'
   mailInstallationName: '{{ .Release.Name }}-mail'
 
   # Default
@@ -719,7 +727,7 @@ keymanager:
   skipPostgresInitCheck: false
   # Keymanager should come up even if Keygen has not run. The idea is to have keygen run by individuals
   skipKeygenCheck: true
-  postgresqlInstallationName: '{{ tpl .Values.global.postgresqlHost $ }}'
+  postgresqlInstallationName: '{{ if eq .Values.global.database.type "external" }}{{ .Values.global.database.external.host }}{{ else }}{{ .Release.Name }}-postgresql{{ end }}'
   istio:
     enabled: false
   springConfig:
@@ -752,6 +760,10 @@ keymanager:
         secretKeyRef:
           name: keymgr-db-user
           key: keymgr-db-user-password
+      SU_USER_PWD:
+        secretKeyRef:
+          name: '{{ if eq .Values.global.database.type "external" }}{{ .Values.global.database.external.existingSecret }}{{ else }}{{ .Release.Name }}-postgresql{{ end }}'
+          key: postgres-password
   keygen:
     enabled: true
     commonAnnotations:
@@ -793,7 +805,7 @@ superset:
     valueFrom:
       secretKeyRef:
         # TODO: Currently hardcoded due to super helm chart not supporting templates,
-        name: openg2p-superset-qa
+        name: openg2p-superset-devops
         key: client_secret
   - name: DB_PASS
     valueFrom:
@@ -817,7 +829,8 @@ superset:
   supersetNode:
     connections:
       redis_host: '{{ tpl .Values.global.redisInstallationName $ }}-master'
-      db_host: '{{ tpl .Values.global.postgresqlHost $ }}'
+      db_host: '172.29.2.220'
+      db_pass:
 
   bootstrapScript: |
     #!/bin/bash
@@ -926,7 +939,7 @@ esignet:
   kafkaInstallationName: '{{ .Release.Name }}-kafka'
   mockIdentitySystemInstallationName: '{{ .Release.Name }}-mock-identity-system'
   softhsmInstallationName: '{{ .Release.Name }}-softhsm'
-  postgresqlInstallationName: '{{ tpl .Values.global.postgresqlHost $ }}'
+  postgresqlInstallationName: '{{ if eq .Values.global.database.type "external" }}{{ .Values.global.database.external.host }}{{ else }}{{ .Release.Name }}-postgresql{{ end }}'
 
   envVarsFrom:
     db_dbuser_password:
@@ -949,6 +962,10 @@ esignet:
         secretKeyRef:
           name: esignet-db-user
           key: esignet-db-user-password
+      SU_USER_PWD:
+        secretKeyRef:
+          name: '{{ if eq .Values.global.database.type "external" }}{{ .Values.global.database.external.existingSecret }}{{ else }}{{ .Release.Name }}-postgresql{{ end }}'
+          key: postgres-password
 
   springConfig:
     names: application,esignet
@@ -973,7 +990,7 @@ mock-identity-system:
         name: mockid-db-user
         key: mockid-db-user-password
 
-  postgresqlInstallationName: '{{ tpl .Values.global.postgresqlHost $ }}'
+  postgresqlInstallationName: '{{ if eq .Values.global.database.type "external" }}{{ .Values.global.database.external.host }}{{ else }}{{ .Release.Name }}-postgresql{{ end }}'
   postgresInit:
     commonAnnotations:
       "helm.sh/hook-weight": "0"
@@ -984,6 +1001,10 @@ mock-identity-system:
         secretKeyRef:
           name: mockid-db-user
           key: mockid-db-user-password
+      SU_USER_PWD:
+        secretKeyRef:
+          name: '{{ if eq .Values.global.database.type "external" }}{{ .Values.global.database.external.existingSecret }}{{ else }}{{ .Release.Name }}-postgresql{{ end }}'
+          key: postgres-password
 
   springConfig:
     names: application,mock-identity-system
