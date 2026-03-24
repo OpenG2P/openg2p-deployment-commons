@@ -241,7 +241,7 @@ minio:
       host: ""
       gateway: "internal"
       destination: '{{ include "common.names.fullname" . }}'
-      destinationPort: "9001"
+      destinationPort: "9000"
     gateway:
       enabled: false
       host: ""
