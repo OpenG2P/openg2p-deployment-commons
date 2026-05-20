@@ -642,10 +642,14 @@ kafka:
     resourcesPreset: "none"
     resources:
       limits:
-        memory: 1Gi
+        cpu: 1Gi
+        memory: 2Gi
       requests:
         cpu: 100m
-        memory: 512Mi
+        memory: 1Gi
+    extraEnvVars:
+      - name: KAFKA_HEAP_OPTS
+        value: "-Xmx512m -Xms512m"
   broker:
     heapOpts: ""
     resources:
