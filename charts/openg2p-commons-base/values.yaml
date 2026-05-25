@@ -210,12 +210,15 @@ redis:
     tag: 7.2.5-debian-12-r4
   auth:
     enabled: false
+  commonConfiguration: |-
+    maxmemory 200mb
+    maxmemory-policy allkeys-lru
   master:
     resourcesPreset: none
     # Redis is lightweight (~3Mi observed). Limit ample for growth.
     resources:
       limits:
-        memory: 128Mi
+        memory: 256Mi
       requests:
         cpu: 50m
         memory: 32Mi
