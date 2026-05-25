@@ -604,7 +604,7 @@ opensearch:
 
 kafka:
   enabled: true
-  heapOpts: ""
+  heapOpts: "-Xmx512m -Xms512m"
   # Sandbox defaults (single replica, replication factor 1, no persistence).
   # ──────────────────────────────────────────────────────────────────────────
   # PRODUCTION CONFIGURATION:
@@ -636,13 +636,13 @@ kafka:
     delete.topic.enable=true
     num.partitions=3
   controller:
-    heapOpts: ""
+    heapOpts: "-Xmx512m -Xms512m"
     replicaCount: 1
     # Based on observed usage ~455Mi.
     resourcesPreset: "none"
     resources:
       limits:
-        memory: 1Gi
+        memory: 2Gi
       requests:
         cpu: 100m
         memory: 512Mi
