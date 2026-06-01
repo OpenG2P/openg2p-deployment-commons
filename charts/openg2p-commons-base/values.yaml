@@ -123,8 +123,6 @@ postgresql:
     # Based on observed usage ~320Mi. For production, increase limit to 2-4Gi.
     resourcesPreset: "none"
     resources:
-      limits:
-        memory: 1Gi
       requests:
         cpu: 100m
         memory: 512Mi
@@ -217,8 +215,6 @@ redis:
     resourcesPreset: none
     # Redis is lightweight (~3Mi observed). Limit ample for growth.
     resources:
-      limits:
-        memory: 256Mi
       requests:
         cpu: 50m
         memory: 32Mi
@@ -240,8 +236,6 @@ redis-auth:
   master:
     resourcesPreset: none
     resources:
-      limits:
-        memory: 128Mi
       requests:
         cpu: 50m
         memory: 32Mi
@@ -256,8 +250,6 @@ minio:
     size: 16Gi
   # Based on observed usage ~100Mi. Increase for heavy S3 workloads.
   resources:
-    limits:
-      memory: 512Mi
     requests:
       cpu: 50m
       memory: 128Mi
@@ -350,8 +342,6 @@ opensearch:
     heapSize: 1g
     resourcesPreset: "none"
     resources:
-      limits:
-        memory: 2Gi
       requests:
         cpu: 100m
         memory: 1Gi
@@ -438,8 +428,6 @@ opensearch:
     # Based on observed usage ~176Mi.
     resourcesPreset: "none"
     resources:
-      limits:
-        memory: 512Mi
       requests:
         cpu: 50m
         memory: 256Mi
@@ -644,16 +632,12 @@ kafka:
     # Based on observed usage ~455Mi.
     resourcesPreset: "none"
     resources:
-      limits:
-        memory: 2Gi
       requests:
         cpu: 100m
         memory: 512Mi
   broker:
     heapOpts: ""
     resources:
-      limits:
-        memory: 1Gi
       requests:
         cpu: 100m
         memory: 512Mi
@@ -756,8 +740,6 @@ kafkaUi:
 
   # Based on observed usage ~420Mi.
   resources:
-    limits:
-      memory: 1Gi
     requests:
       cpu: 50m
       memory: 512Mi
@@ -941,8 +923,6 @@ softhsm:
   # Hardcoding this for now. else every upgrade will reset the pin
   securityPIN: MTYwMzIyMjg=
   resources:
-    limits:
-      memory: 128Mi
     requests:
       cpu: 10m
       memory: 32Mi
